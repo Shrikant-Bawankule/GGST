@@ -110,9 +110,6 @@ for _, row in df.iterrows():
 raw_avg_wer = np.mean(raw_wers)
 pre_avg_wer = np.mean(pre_wers)
 
-raw_accuracy = (1 - raw_avg_wer) * 100
-pre_accuracy = (1 - pre_avg_wer) * 100
-
 print("FILES USED:", len(pre_wers))
 print("RAW WER:", round(raw_avg_wer, 4))
 print("PREPROCESSED WER:", round(pre_avg_wer, 4))
