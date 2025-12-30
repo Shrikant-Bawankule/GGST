@@ -1,7 +1,0 @@
-librosa
-numpy
-soundfile
-pandas
-jiwer
-torch
-faster-whisper
