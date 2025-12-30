@@ -1,6 +1,3 @@
-# Stage 1B Production Module
-# Complete text validation pipeline
-
 import re
 import unicodedata
 
