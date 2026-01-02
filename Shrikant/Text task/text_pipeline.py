@@ -1,16 +1,3 @@
-"""
-STAGE 1B + STAGE 2B PRODUCTION PIPELINE
-Text Validation + Language Identification
-
-Input: Raw text
-Output: Cleaned text + Language detection with routing
-
-Usage:
-    pipeline = ProductionPipeline()
-    result = pipeline.process("नमस्ते आज का मौसम कैसे है")
-    print(result)
-"""
-
 import re
 import unicodedata
 import numpy as np
@@ -20,12 +7,7 @@ from typing import Dict, List
 
 warnings.filterwarnings("ignore")
 
-# ============================================================================
-# NUMPY 2.0 COMPATIBILITY FIX
-# ============================================================================
-
 def monkey_patch_numpy():
-    """Fix NumPy 2.0 + fasttext compatibility issue"""
     original_array = np.array
     def patched_array(obj, copy=False, *args, **kwargs):
         if copy is False:
@@ -36,10 +18,6 @@ def monkey_patch_numpy():
 monkey_patch_numpy()
 
 import fasttext
-
-# ============================================================================
-# STAGE 1B: TEXT VALIDATION CLASSES
-# ============================================================================
 
 class HunspellChecker:
     """Hunspell-based spell checker for Indian languages"""
@@ -107,17 +85,6 @@ class IndicSpellChecker:
 
 
 class Stage1BTextValidation:
-    """
-    STAGE 1B: Text Validation Pipeline
-    
-    Input: Raw text with noise/typos
-    Output: Cleaned, spell-corrected text
-    
-    Process:
-        1. Basic text cleaning (whitespace, unicode normalization)
-        2. IndicSpell typo correction
-        3. Hunspell validation
-    """
     
     def __init__(self, language="hi"):
         self.language = language
@@ -153,11 +120,6 @@ class Stage1BTextValidation:
         """Main processing method for Stage 1B"""
         return self.validate_text(text)
 
-
-# ============================================================================
-# STAGE 2B: LANGUAGE IDENTIFICATION
-# ============================================================================
-
 @dataclass
 class LIDResult:
     """Language Identification Result"""
@@ -169,14 +131,6 @@ class LIDResult:
 
 
 class LanguageIdentifier:
-    """
-    STAGE 2B: Language Identification (Text Path)
-    
-    Model: fastText LID (lid.176.bin - 176 supported languages)
-    
-    Input: Text
-    Output: Language code, confidence score, routing key
-    """
     
     INDIAN_LANGUAGES = {
         "hi": "Hindi", "kn": "Kannada", "te": "Telugu",
@@ -186,13 +140,7 @@ class LanguageIdentifier:
     }
     
     def __init__(self, model_path=None, confidence_threshold=0.8):
-        """
-        Initialize Language Identifier
-        
-        Args:
-            model_path: Path to lid.176.bin model file
-            confidence_threshold: Minimum confidence for valid detection (0.0-1.0)
-        """
+
         self.model_path = model_path
         self.model = None
         self.conf_threshold = confidence_threshold
@@ -204,15 +152,7 @@ class LanguageIdentifier:
                 print(f"Warning: Could not load model: {e}")
     
     def detect(self, text: str) -> LIDResult:
-        """
-        Detect language of input text
-        
-        Args:
-            text: Input text to detect language from
-        
-        Returns:
-            LIDResult: Detection result with language code, name, confidence, routing key
-        """
+
         if not isinstance(text, str) or len(text.strip()) < 5:
             return LIDResult("unk", "Unknown", 0.0, "nlu_fallback")
         
@@ -243,32 +183,10 @@ class LanguageIdentifier:
         except Exception as e:
             return LIDResult("error", f"Detection failed: {str(e)}", 0.0, "nlu_fallback")
 
-
-# ============================================================================
-# COMPLETE PRODUCTION PIPELINE
-# ============================================================================
-
 class ProductionPipeline:
-    """
-    Complete Stage 1B + Stage 2B Pipeline
-    
-    Orchestrates text validation and language identification
-    
-    Usage:
-        pipeline = ProductionPipeline(lid_model_path="/path/to/lid.176.bin")
-        result = pipeline.process("नमस्ते आज का मौसम कैसे है")
-        print(f"Language: {result.lang_name}")
-        print(f"Cleaned: {result.cleaned_text}")
-        print(f"Route: {result.route_key}")
-    """
-    
+
     def __init__(self, lid_model_path=None):
-        """
-        Initialize production pipeline
-        
-        Args:
-            lid_model_path: Path to fastText LID model (lid.176.bin)
-        """
+
         self.lid_detector = LanguageIdentifier(model_path=lid_model_path)
         self.stage1b_pipelines = {
             "hi": Stage1BTextValidation("hi"),
@@ -277,24 +195,7 @@ class ProductionPipeline:
         }
     
     def process(self, text: str) -> Dict:
-        """
-        Process text through complete pipeline
-        
-        Args:
-            text: Input text to process
-        
-        Returns:
-            dict: Complete processing results
-                {
-                    'input': original text,
-                    'cleaned_text': Stage 1B output,
-                    'lang_code': detected language code,
-                    'lang_name': detected language name,
-                    'confidence': detection confidence (0.0-1.0),
-                    'route_key': NLU routing key,
-                    'status': 'success' or error message
-                }
-        """
+  
         if not text or not isinstance(text, str):
             return {
                 'input': text,
@@ -335,11 +236,6 @@ class ProductionPipeline:
                 'route_key': "nlu_fallback",
                 'status': f'error: {str(e)}'
             }
-
-
-# ============================================================================
-# EXAMPLE USAGE
-# ============================================================================
 
 if __name__ == "__main__":
     print("=" * 80)
