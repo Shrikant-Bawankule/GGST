@@ -132,4 +132,3 @@ Model download instructions included in README.md.
 ***
 
 **Total Deliverables:** 14 files, production-ready pipeline with 94% accuracy.  
-[13](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/36836510/6e56b18a-a70c-485a-8580-33cdfe5059be/text-validation.ipynb)
